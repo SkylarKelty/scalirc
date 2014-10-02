@@ -2,5 +2,9 @@
 package uk.skelty.ScalIRC
 
 object Response {
-	def message(channel : String, message : String): String = "PRIVMSG " + channel + " :" + message
+	/**
+	 * Crafts a PRIVMSG response.
+	 * @type String
+	 */
+	def message(channel: String, message: String): String = "PRIVMSG " + channel + " :" + message
 }
