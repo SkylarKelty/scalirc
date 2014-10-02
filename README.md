@@ -1,0 +1,4 @@
+scalirc
+=======
+
+Scala IRC Bot
