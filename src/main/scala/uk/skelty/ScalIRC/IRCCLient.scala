@@ -17,7 +17,7 @@ class IRCClient () {
 		val channel = "#skytown"
 
 		writer.write("NICK " + nick + "\r\n");
-		writer.write("USER " + login + " 8 * : scalirc.skelty.uk Bot\r\n");
+		writer.write("USER " + login + " 8 * :Skylar\'s Bot\r\n");
 		writer.flush();
 
 		var line = ""
@@ -73,16 +73,14 @@ class IRCClient () {
 				    	}
 			    	}
 			    }
-			    
-			    println("RESULT: " + result)
 
-			    if (result != "") {
-			        writer.write(result + "\r\n");
-			        writer.flush();
-			    }
-			 
 			    if (result == "shutdown") {
 			    	break;
+			    } else if (result != "") {
+			    	println("RESULT: " + result)
+
+			        writer.write(result + "\r\n");
+			        writer.flush();
 			    }
 			}
 		}
