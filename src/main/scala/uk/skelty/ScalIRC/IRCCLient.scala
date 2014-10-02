@@ -6,7 +6,7 @@ import java.io._
 import scala.io._
 import scala.util.control.Breaks._
 
-class IRCClient {
+class IRCClient () {
 	def connect() {
 		val socket  = new Socket("irc.kent.ac.uk", 6667);
 		val writer  = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -37,20 +37,54 @@ class IRCClient {
 		writer.write("JOIN " + channel + "\r\n");
 		writer.flush();
  
-		while ({line = reader.readLine(); line != null}) {
-		 
-		    if (line.toLowerCase().startsWith("ping ")) {
-		        // We must respond to PINGs to avoid being disconnected.
-		        writer.write("PONG " + line.substring(5) + "\r\n");
-		        writer.write("PRIVMSG " + channel + " :I got pinged!\r\n");
-		        writer.flush( );
-		    } else {
+		breakable {
+			while ({line = reader.readLine(); line != null}) {
+				var result = ""
+
 		        println(line);
-		    }
-		 
-		    if (line.toLowerCase().contains("shutdown")) {
-		    	break;
-		    }
+
+			    if (line.toLowerCase().startsWith("ping ")) {
+			    	result = "PONG " + line.substring(5)
+			    } else {
+			    	// Split the line up.
+			    	val parts = line.split(" ")
+
+			    	// Do we know what to do with this?
+			    	if (parts.length >= 3) {
+				    	val ident = parts(0)
+				    	// Does this look like an ident?
+				    	if (ident.indexOf("!") >= 0 && ident.indexOf(":") >= 0 && ident.indexOf("@") >= 0) {
+					    	val msgtype = parts(1)
+					    	val channel = parts(2)
+
+					    	// Parse the ident.
+					    	val nick = ident.substring(1, ident.indexOf("!"))
+
+					    	// Create a message object.
+					    	val message = new Message(nick, channel, msgtype)
+
+					    	// Process the message.
+					    	if (parts.length > 3) {
+					    		val msg = parts(3)
+					    		result = message.process(msg)
+					    	} else {
+					    		result = message.process()
+					    	}
+				    	}
+			    	}
+			    }
+			    
+			    println("RESULT: " + result)
+
+			    if (result != "") {
+			        writer.write(result + "\r\n");
+			        writer.flush();
+			    }
+			 
+			    if (result == "shutdown") {
+			    	break;
+			    }
+			}
 		}
 
 		writer.close()
