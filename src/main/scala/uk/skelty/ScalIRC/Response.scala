@@ -6,5 +6,5 @@ object Response {
 	 * Crafts a PRIVMSG response.
 	 * @type String
 	 */
-	def message(channel: String, message: String): String = "PRIVMSG " + channel + " :" + message
+	def message(channel: String, message: String): String = "PRIVMSG " + channel + " :" + message + "\r\n"
 }

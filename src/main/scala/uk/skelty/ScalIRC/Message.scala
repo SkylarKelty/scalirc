@@ -1,23 +1,28 @@
 
 package uk.skelty.ScalIRC
 
-class Message (ident: String, channel: String, msgtype: String) {
+import java.io._
+import scala.io._
+
+class Message (writer: BufferedWriter, ident: String, channel: String, msgtype: String) {
 	/**
 	 * Process a message.
 	 * @type String
 	 */
-	def process (extra: String = ""): String = msgtype match {
-		case "PRIVMSG" => process_privmsg(extra.substring(1))
-		case _ => ""
-	}
+	def process (isadmin: Boolean, extra: String = "") {
+		println("Processing message type: " + msgtype)
 
-	/**
-	 * Process a private message.
-	 * @type String
-	 */
-	def process_privmsg(extra: String): String = extra match {
-		case "shutdown" => "shutdown"
-		case "hey" => Response.message(channel, "hello!")
-		case _ => ""
+		if (msgtype == "PRIVMSG") {
+			val msg = extra.substring(1)
+			println("Processing message: " + msg)
+
+			val parts = msg.split(" ")
+			if (parts(0) == "!S") {
+				val command = parts(1)
+				command match {
+					case "remind" => Responses.Reminder.respond(writer, channel, msg)
+				}
+			}
+		}
 	}
 }

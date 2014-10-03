@@ -39,12 +39,11 @@ class IRCClient () {
  
 		breakable {
 			while ({line = reader.readLine(); line != null}) {
-				var result = ""
-
 		        println(line);
 
 			    if (line.toLowerCase().startsWith("ping ")) {
-			    	result = "PONG " + line.substring(5)
+			        writer.write("PONG " + line.substring(5) + "\r\n")
+			        writer.flush()
 			    } else {
 			    	// Split the line up.
 			    	val parts = line.split(" ")
@@ -59,28 +58,22 @@ class IRCClient () {
 
 					    	// Parse the ident.
 					    	val nick = ident.substring(1, ident.indexOf("!"))
+					    	val isadmin = nick == "sky"
 
 					    	// Create a message object.
-					    	val message = new Message(nick, channel, msgtype)
+					    	val message = new Message(writer, nick, channel, msgtype)
 
 					    	// Process the message.
 					    	if (parts.length > 3) {
 					    		val msg = parts(3)
-					    		result = message.process(msg)
-					    	} else {
-					    		result = message.process()
+					    		if (isadmin && msg == ":shutdown") {
+					    			break;
+					    		}
+
+					    		message.process(isadmin, msg)
 					    	}
 				    	}
 			    	}
-			    }
-
-			    if (result == "shutdown") {
-			    	break;
-			    } else if (result != "") {
-			    	println("RESULT: " + result)
-
-			        writer.write(result + "\r\n");
-			        writer.flush();
 			    }
 			}
 		}
